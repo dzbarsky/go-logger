@@ -1,0 +1,2 @@
+An experiment to see how fast JSON logging can be.
+stdlib log package uses a mutex so it doesn't scale very well. Need a solution.
