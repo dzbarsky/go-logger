@@ -1,10 +1,10 @@
 package logger
 
 import (
-	"log"
 	"io"
-	"testing"
+	"log"
 	"sync"
+	"testing"
 )
 
 /*
@@ -12,16 +12,16 @@ goos: darwin
 goarch: amd64
 pkg: logger/logger
 cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-BenchmarkLogger-16          	 2313824	       507.3 ns/op
-BenchmarkLogger4-16         	  608257	      1797 ns/op
-BenchmarkLogger8-16         	  301158	      3880 ns/op
-BenchmarkLogger16-16        	  148124	      7947 ns/op
-BenchmarkLogger32-16        	   75054	     15770 ns/op
-BenchmarkLoggerNoop-16      	425889259	         2.724 ns/op
-BenchmarkLogger4Noop-16     	417245281	         2.860 ns/op
-BenchmarkLogger8Noop-16     	400372350	         2.897 ns/op
-BenchmarkLogger16Noop-16    	222931371	         5.310 ns/op
-BenchmarkLogger32Noop-16    	110269083	        10.70 ns/op
+BenchmarkLogger-16          	 2015685	       590.8 ns/op
+BenchmarkLogger4-16         	  687106	      1709 ns/op
+BenchmarkLogger8-16         	  305707	      3685 ns/op
+BenchmarkLogger16-16        	  140256	      7646 ns/op
+BenchmarkLogger32-16        	   74095	     16142 ns/op
+BenchmarkLoggerNoop-16      	265901402	         4.472 ns/op
+BenchmarkLogger4Noop-16     	268158448	         4.499 ns/op
+BenchmarkLogger8Noop-16     	230825785	         5.050 ns/op
+BenchmarkLogger16Noop-16    	137533003	         8.709 ns/op
+BenchmarkLogger32Noop-16    	57586251	        17.81 ns/op
 */
 
 func BenchmarkLogger(b *testing.B) {
@@ -45,23 +45,23 @@ func BenchmarkLogger32(b *testing.B) {
 }
 
 func BenchmarkLoggerNoop(b *testing.B) {
-	benchmarkLoggerN(b, 1, Debug)
+	benchmarkLoggerN(b, 1, Error)
 }
 
 func BenchmarkLogger4Noop(b *testing.B) {
-	benchmarkLoggerN(b, 4, Debug)
+	benchmarkLoggerN(b, 4, Error)
 }
 
 func BenchmarkLogger8Noop(b *testing.B) {
-	benchmarkLoggerN(b, 8, Debug)
+	benchmarkLoggerN(b, 8, Error)
 }
 
 func BenchmarkLogger16Noop(b *testing.B) {
-	benchmarkLoggerN(b, 16, Debug)
+	benchmarkLoggerN(b, 16, Error)
 }
 
 func BenchmarkLogger32Noop(b *testing.B) {
-	benchmarkLoggerN(b, 32, Debug)
+	benchmarkLoggerN(b, 32, Error)
 }
 
 func benchmarkLoggerN(b *testing.B, n int, minS Severity) {
