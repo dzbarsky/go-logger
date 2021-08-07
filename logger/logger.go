@@ -132,7 +132,13 @@ func (l *Logger) ScopedStream(s *Scope, severity Severity) Stream {
 	}
 
 	// TODO: preallocate some keys and values in the slice and pool the streams?
-	return &logStream{severity: severity, l: l}
+	ls := &logStream{
+		severity: severity,
+		l: l,
+		buf: bytes.NewBuffer(make([]byte, 0, 100)),
+	}
+	writeKV(ls.buf, "severity", severity.String())
+	return ls
 }
 
 type noopStream struct{}
@@ -152,11 +158,14 @@ type logStream struct {
 
 	keys   []string
 	values []string
+
+	buf *bytes.Buffer
 }
 
 func (l *logStream) Tag(k string, v string) {
 	l.keys = append(l.keys, k)
 	l.values = append(l.values, v)
+	writeKV(l.buf, k, v)
 }
 
 func (l *logStream) Logf(msg string, args ...interface{}) {
@@ -165,17 +174,12 @@ func (l *logStream) Logf(msg string, args ...interface{}) {
 
 func (l *logStream) Log(msg string) {
 	buf := bytes.NewBuffer(make([]byte, 0, 200))
+
 	buf.WriteRune('{')
+	buf.Write(l.buf.Bytes())
+	writeKV(buf, "message", msg)
+	buf.WriteRune('}')
 
-	l.l.writeTags(buf)
-	writeKV(buf, l.keys, l.values)
-
-	buf.WriteString(`"message": "`)
-	buf.WriteString(msg)
-
-	buf.WriteString(`, "severity": "`)
-	buf.WriteString(l.severity.String())
-	buf.WriteString(`"}`)
 	l.l.out.Write(buf.Bytes())
 }
 
@@ -188,19 +192,24 @@ func (l *logStream) Since(s time.Time) string {
 	return time.Since(s).String()
 }
 
-func writeKV(buf *bytes.Buffer, keys []string, values []string) {
+func writeKVs(buf *bytes.Buffer, keys []string, values []string) {
 	// TODO: escape strings for json?
 	for i, k := range keys {
-		buf.WriteRune('"')
-		buf.WriteString(k)
-		buf.WriteString(`": "`)
-		buf.WriteString(values[i])
-		buf.WriteString(`",`)
+		writeKV(buf, k, values[i])
 	}
 }
 
+
+func writeKV(buf *bytes.Buffer, k, v string) {
+	buf.WriteRune('"')
+	buf.WriteString(k)
+	buf.WriteString(`": "`)
+	buf.WriteString(v)
+	buf.WriteString(`",`)
+}
+
 func (l *Logger) writeTags(buf *bytes.Buffer) {
-	writeKV(buf, l.keys, l.values)
+	writeKVs(buf, l.keys, l.values)
 
 	if l.parent != nil {
 		l.parent.writeTags(buf)
