@@ -197,7 +197,7 @@ func (l *logStream) Log(msg string) {
 	writeKV(buf, "message", msg)
 	buf.WriteRune('}')
 
-	l.l.out.Write(buf.Bytes())
+	l.l.out.Write(buf)
 }
 
 func (l *logStream) LogApply(msg func() string) {

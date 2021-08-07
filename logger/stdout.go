@@ -1,33 +1,42 @@
 package logger
 
 import (
+	"bytes"
 	"io"
+	"log"
+
+	"code.cloudfoundry.org/go-diodes"
 )
 
-const batch = 100
+const batch = 1 << 24
 
 type stdoutStream struct {
 	w io.Writer
-	stream chan []byte
+	stream *diodes.ManyToOne
 }
 
 func newStdout(w io.Writer) *stdoutStream {
+	d := diodes.NewManyToOne(batch, diodes.AlertFunc(func(missed int) {
+		log.Printf("Dropped %d messages", missed)
+	}))
+
 	s := &stdoutStream{
 		w: w,
-		stream: make(chan []byte, 100),
+		stream: d,
 	}
 	go s.emit()
 	return s
 }
 
-func (s *stdoutStream) Write(val []byte) {
-	s.stream <- val
+func (s *stdoutStream) Write(buf *bytes.Buffer) {
+	s.stream.Set(diodes.GenericDataType(buf))
 }
 
 func (s *stdoutStream) emit() {
+	poller := diodes.NewPoller(s.stream)
 	for {
-		val := <- s.stream
-		_, err := s.w.Write(val)
+		buf := (*bytes.Buffer)(poller.Next())
+		_, err := s.w.Write(buf.Bytes())
 		if err != nil {
 			panic(err)
 		}

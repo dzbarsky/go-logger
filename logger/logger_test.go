@@ -11,16 +11,16 @@ goos: darwin
 goarch: amd64
 pkg: logger/logger
 cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-BenchmarkLogger-16          	 2924002	       407.6 ns/op
-BenchmarkLogger4-16         	 1000000	      1089 ns/op
-BenchmarkLogger8-16         	  384459	      3080 ns/op
-BenchmarkLogger16-16        	  146133	      8157 ns/op
-BenchmarkLogger32-16        	   64447	     20281 ns/op
-BenchmarkLoggerNoop-16      	260301682	         4.424 ns/op
-BenchmarkLogger4Noop-16     	255403711	         4.894 ns/op
-BenchmarkLogger8Noop-16     	241054590	         5.027 ns/op
-BenchmarkLogger16Noop-16    	123985369	         9.783 ns/op
-BenchmarkLogger32Noop-16    	60147390	        19.84 ns/op
+BenchmarkLogger-16          	 2733336	       378.2 ns/op
+BenchmarkLogger4-16         	 2329848	       503.4 ns/op
+BenchmarkLogger8-16         	 1493989	       763.4 ns/op
+BenchmarkLogger16-16        	  853063	      1678 ns/op
+BenchmarkLogger32-16        	  424562	      2813 ns/op
+BenchmarkLoggerNoop-16      	256975561	         4.666 ns/op
+BenchmarkLogger4Noop-16     	230660073	         4.894 ns/op
+BenchmarkLogger8Noop-16     	191718781	         5.344 ns/op
+BenchmarkLogger16Noop-16    	110457702	        10.43 ns/op
+BenchmarkLogger32Noop-16    	55718136	        21.16 ns/op
 */
 
 func BenchmarkLogger(b *testing.B) {
