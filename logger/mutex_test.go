@@ -11,16 +11,16 @@ goos: darwin
 goarch: amd64
 pkg: logger/logger
 cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-BenchmarkMutex-16          	  431023	      2533 ns/op
-BenchmarkMutex4-16         	  127555	      9422 ns/op
-BenchmarkMutex8-16         	   63049	     19030 ns/op
-BenchmarkMutex16-16        	   31110	     37865 ns/op
-BenchmarkMutex32-16        	   15757	     76381 ns/op
-BenchmarkMutexNoop-16      	33648066	        35.46 ns/op
-BenchmarkMutex4Noop-16     	 4667289	       256.7 ns/op
-BenchmarkMutex8Noop-16     	 1509859	       804.7 ns/op
-BenchmarkMutex16Noop-16    	  743716	      1697 ns/op
-BenchmarkMutex32Noop-16    	  352146	      3545 ns/op
+BenchmarkMutex-16          	  567092	      1786 ns/op
+BenchmarkMutex4-16         	  141592	      8190 ns/op
+BenchmarkMutex8-16         	   72516	     16779 ns/op
+BenchmarkMutex16-16        	   35400	     33699 ns/op
+BenchmarkMutex32-16        	   17161	     68696 ns/op
+BenchmarkMutexNoop-16      	37217535	        30.94 ns/op
+BenchmarkMutex4Noop-16     	 4726400	       246.3 ns/op
+BenchmarkMutex8Noop-16     	 1620813	       807.3 ns/op
+BenchmarkMutex16Noop-16    	  772576	      1827 ns/op
+BenchmarkMutex32Noop-16    	  365168	      3630 ns/op
 */
 
 func BenchmarkMutex(b *testing.B) {

@@ -107,6 +107,18 @@ func (l *Logger) Errorf(msg string, args ...interface{}) {
 	l.ScopedStream(l.scope, Error).Logf(msg, args...)
 }
 
+func (l *Logger) valueFor(k string) string {
+	for j, key := range l.keys {
+		if key == k {
+			return l.values[j]
+		}
+	}
+	if l.parent != nil {
+		l.parent.valueFor(k)
+	}
+	panic("no such key: " + k)
+}
+
 type Stream interface {
 	Log(msg string)
 	Logf(msg string, args ...interface{})
@@ -114,7 +126,10 @@ type Stream interface {
 	Tag(key string, value string)
 
 	Now() time.Time
-	Since(time.Time) string
+	Since(time.Time) time.Duration
+	StringSince(time.Time) string
+
+	Histogram(h *HistogramDef) Histo
 }
 
 func (l *Logger) ScopedStream(s *Scope, severity Severity) Stream {
@@ -148,7 +163,9 @@ func (*noopStream) Logf(msg string, args ...interface{}) {}
 func (*noopStream) LogApply(func() string)               {}
 func (*noopStream) Tag(key string, value string)         {}
 func (*noopStream) Now() time.Time                       { return time.Time{} }
-func (*noopStream) Since(time.Time) string               { return "" }
+func (*noopStream) Since(time.Time) time.Duration               { return 0 }
+func (*noopStream) StringSince(time.Time) string               { return "" }
+func (*noopStream) Histogram(*HistogramDef) Histo { return aNoopHistogram }
 
 var aNoopStream = &noopStream{}
 
@@ -188,8 +205,31 @@ func (l *logStream) LogApply(msg func() string) {
 }
 
 func (l *logStream) Now() time.Time { return time.Now() }
-func (l *logStream) Since(s time.Time) string {
+func (l *logStream) Since(s time.Time) time.Duration {
+	return time.Since(s)
+}
+func (l *logStream) StringSince(s time.Time) string {
 	return time.Since(s).String()
+}
+
+func (l *logStream) valueFor(k string) string {
+	for j, key := range l.keys {
+		if key == k {
+			return l.values[j]
+		}
+	}
+	return l.l.valueFor(k)
+}
+
+func (l *logStream) Histogram(h *HistogramDef) Histo {
+	ks := make([]string, len(h.tags))
+	vs := make([]string, len(h.tags))
+	for i, k := range h.tags {
+		ks[i] = k
+		vs[i] = l.valueFor(k)
+	}
+
+	return &Histogram{unit: h.unit, ks: ks, vs: vs}
 }
 
 func writeKVs(buf *bytes.Buffer, keys []string, values []string) {
@@ -215,3 +255,4 @@ func (l *Logger) writeTags(buf *bytes.Buffer) {
 		l.parent.writeTags(buf)
 	}
 }
+
