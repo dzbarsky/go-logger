@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"log"
-	"strings"
+	"io"
+	"bytes"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -51,6 +51,7 @@ type Scope struct {
 }
 
 type Logger struct {
+	out *stdoutStream
 	scope  *Scope
 	parent *Logger
 
@@ -58,8 +59,9 @@ type Logger struct {
 	values []string
 }
 
-func New() *Logger {
+func New(w io.Writer) *Logger {
 	return &Logger{
+		out: newStdout(w),
 		scope: &Scope{},
 	}
 }
@@ -71,6 +73,7 @@ func (l *Logger) Tag(k string, v string) {
 
 func (l *Logger) PushScope(name string) *Logger {
 	return &Logger{
+		out: l.out,
 		scope:  &Scope{name: name},
 		parent: l,
 	}
@@ -161,20 +164,19 @@ func (l *logStream) Logf(msg string, args ...interface{}) {
 }
 
 func (l *logStream) Log(msg string) {
-	var sb strings.Builder
-	sb.Grow(200)
-	sb.WriteString("{")
+	buf := bytes.NewBuffer(make([]byte, 0, 200))
+	buf.WriteRune('{')
 
-	l.l.writeTags(&sb)
-	writeKV(&sb, l.keys, l.values)
+	l.l.writeTags(buf)
+	writeKV(buf, l.keys, l.values)
 
-	sb.WriteString(`"message": "`)
-	sb.WriteString(msg)
+	buf.WriteString(`"message": "`)
+	buf.WriteString(msg)
 
-	sb.WriteString(`, "severity": "`)
-	sb.WriteString(l.severity.String())
-	sb.WriteString(`"}`)
-	log.Print(sb.String())
+	buf.WriteString(`, "severity": "`)
+	buf.WriteString(l.severity.String())
+	buf.WriteString(`"}`)
+	l.l.out.Write(buf.Bytes())
 }
 
 func (l *logStream) LogApply(msg func() string) {
@@ -186,21 +188,21 @@ func (l *logStream) Since(s time.Time) string {
 	return time.Since(s).String()
 }
 
-func writeKV(sb *strings.Builder, keys []string, values []string) {
+func writeKV(buf *bytes.Buffer, keys []string, values []string) {
 	// TODO: escape strings for json?
 	for i, k := range keys {
-		sb.WriteString(`"`)
-		sb.WriteString(k)
-		sb.WriteString(`": "`)
-		sb.WriteString(values[i])
-		sb.WriteString(`",`)
+		buf.WriteRune('"')
+		buf.WriteString(k)
+		buf.WriteString(`": "`)
+		buf.WriteString(values[i])
+		buf.WriteString(`",`)
 	}
 }
 
-func (l *Logger) writeTags(sb *strings.Builder) {
-	writeKV(sb, l.keys, l.values)
+func (l *Logger) writeTags(buf *bytes.Buffer) {
+	writeKV(buf, l.keys, l.values)
 
 	if l.parent != nil {
-		l.parent.writeTags(sb)
+		l.parent.writeTags(buf)
 	}
 }

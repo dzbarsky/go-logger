@@ -2,7 +2,6 @@ package logger
 
 import (
 	"io"
-	"log"
 	"sync"
 	"testing"
 )
@@ -12,16 +11,16 @@ goos: darwin
 goarch: amd64
 pkg: logger/logger
 cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-BenchmarkLogger-16          	 2015685	       590.8 ns/op
-BenchmarkLogger4-16         	  687106	      1709 ns/op
-BenchmarkLogger8-16         	  305707	      3685 ns/op
-BenchmarkLogger16-16        	  140256	      7646 ns/op
-BenchmarkLogger32-16        	   74095	     16142 ns/op
-BenchmarkLoggerNoop-16      	265901402	         4.472 ns/op
-BenchmarkLogger4Noop-16     	268158448	         4.499 ns/op
-BenchmarkLogger8Noop-16     	230825785	         5.050 ns/op
-BenchmarkLogger16Noop-16    	137533003	         8.709 ns/op
-BenchmarkLogger32Noop-16    	57586251	        17.81 ns/op
+BenchmarkLogger-16          	 2924002	       407.6 ns/op
+BenchmarkLogger4-16         	 1000000	      1089 ns/op
+BenchmarkLogger8-16         	  384459	      3080 ns/op
+BenchmarkLogger16-16        	  146133	      8157 ns/op
+BenchmarkLogger32-16        	   64447	     20281 ns/op
+BenchmarkLoggerNoop-16      	260301682	         4.424 ns/op
+BenchmarkLogger4Noop-16     	255403711	         4.894 ns/op
+BenchmarkLogger8Noop-16     	241054590	         5.027 ns/op
+BenchmarkLogger16Noop-16    	123985369	         9.783 ns/op
+BenchmarkLogger32Noop-16    	60147390	        19.84 ns/op
 */
 
 func BenchmarkLogger(b *testing.B) {
@@ -65,9 +64,7 @@ func BenchmarkLogger32Noop(b *testing.B) {
 }
 
 func benchmarkLoggerN(b *testing.B, n int, minS Severity) {
-	log.SetOutput(io.Discard)
-
-	logger := New()
+	logger := New(io.Discard)
 
 	logger.Tag("version", "deadbeef")
 	logger = logger.PushScope("s2")

@@ -2,7 +2,6 @@ package logger
 
 import (
 	"io"
-	"log"
 	"sync"
 	"testing"
 )
@@ -65,9 +64,7 @@ func BenchmarkMutex32Noop(b *testing.B) {
 }
 
 func benchmarkMutexN(b *testing.B, n int, minS Severity) {
-	log.SetOutput(io.Discard)
-
-	logger := New()
+	logger := New(io.Discard)
 
 	logger.Tag("version", "deadbeef")
 	logger.Tag("version2", "deadbeef")
